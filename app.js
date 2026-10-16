@@ -35,7 +35,7 @@
       setConnection('online', 'متصل بقاعدة البيانات · يمكنك الإرسال بأمان.');
       await runSearch(false);
     } catch (err) {
-      setConnection('error', 'تعذر الاتصال بقاعدة البيانات · الإرسال متوقف حتى عودة الاتصال.');
+      setConnection('error', 'تعذر الاتصال بقاعدة البيانات · أعد تحميل الصفحة.');
       showEmpty('لم نتمكن من تحميل المشكلات', errorFriendly(err));
     } finally {
       state.connectionChecking = false;
@@ -95,7 +95,7 @@
         await runSearch(false);
       }
     } catch (err) {
-      setConnection('error', 'تعذر الاتصال بقاعدة البيانات · الإرسال متوقف حتى عودة الاتصال.');
+      setConnection('error', 'تعذر الاتصال بقاعدة البيانات ·أعد تحميل الصفحة.');
     } finally {
       state.connectionChecking = false;
       if (state.connectionRetryPending && navigator.onLine !== false) {
@@ -228,7 +228,7 @@
       event.preventDefault();
       const form = this;
       if (!state.connected) {
-        showMessage($('#problemFormMessage'), 'قاعدة البيانات غير متصلة حاليًا. استنى حتى يتحول المؤشر إلى الأخضر ثم أعد المحاولة.', 'error');
+        showMessage($('#problemFormMessage'), 'قاعدة البيانات غير متصلة حاليًا. أعد تحميل الصفحة وانتظر حتى يتحول المؤشر إلى الأخضر ثم أعد المحاولة.', 'error');
         return;
       }
       if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -269,7 +269,7 @@
 
   async function openProblem(id) {
     if (!state.connected) {
-      showToast('قاعدة البيانات غير متصلة حاليًا. عُد عندما يتحول شريط الاتصال إلى الأخضر.', 'error');
+      showToast('قاعدة البيانات غير متصلة حاليًا. أعد تحميل الصفحة حتى  يتحول شريط الاتصال إلى الأخضر.', 'error');
       return;
     }
     $('#dialogTitle').textContent = 'جارٍ تحميل المشكلة…';
@@ -343,7 +343,7 @@
     $('#solutionForm').addEventListener('submit', async function (event) {
       event.preventDefault();
       if (!state.connected) {
-        showMessage($('#solutionFormMessage'), 'قاعدة البيانات غير متصلة حاليًا. استنى حتى يتحول المؤشر إلى الأخضر ثم أعد المحاولة.', 'error');
+        showMessage($('#solutionFormMessage'), 'قاعدة البيانات غير متصلة حاليًا. أعد تحميل الصفحة وانتظر حتى يتحول المؤشر إلى الأخضر ثم أعد المحاولة.', 'error');
         return;
       }
       if (!this.checkValidity()) { this.reportValidity(); return; }
@@ -376,7 +376,7 @@
     $('#reportForm').addEventListener('submit', async function (event) {
       event.preventDefault();
       if (!state.connected) {
-        showMessage($('#reportFormMessage'), 'قاعدة البيانات غير متصلة حاليًا. أعد المحاولة عند عودة الاتصال.', 'error');
+        showMessage($('#reportFormMessage'), 'قاعدة البيانات غير متصلة حاليًا. أعد تحميل الصفحة حتى عودة الاتصال.', 'error');
         return;
       }
       if (!this.checkValidity()) { this.reportValidity(); return; }
@@ -474,7 +474,7 @@
     const code = String(err && err.message ? err.message : err || '');
     const connectionErrors = ['CONFIG_MISSING', 'REQUEST_TIMEOUT', 'REQUEST_FAILED', 'SUBMISSION_PENDING', 'API_VERSION_OLD', 'WRITE_NOT_VERIFIED'];
     if (navigator.onLine === false || connectionErrors.indexOf(code) !== -1) {
-      setConnection('error', navigator.onLine === false ? 'الاتصال بالإنترنت مقطوع · الإرسال متوقف مؤقتًا.' : 'تعذر التأكد من قاعدة البيانات · الإرسال متوقف حتى عودة الاتصال.');
+      setConnection('error', navigator.onLine === false ? 'الاتصال بالإنترنت مقطوع · الإرسال متوقف مؤقتًا.' : 'تعذر التأكد من قاعدة البيانات · أعد تحميل الصفحة حتى عودة الاتصال.');
     }
   }
   function showMessage(node, text, type) { node.hidden = false; node.className = 'form-message ' + type; node.textContent = text; }
@@ -489,14 +489,14 @@
   function truncate(value, max) { return value.length > max ? value.slice(0, max).trim() + '…' : value; }
   function errorFriendly(err) {
     const message = String(err && err.message ? err.message : err || '');
-    if (message === 'CONFIG_MISSING') return 'لم يتم ضبط رابط Google Apps Script بعد. افتح ملف config.js وأضف رابط /exec المنشور.';
-    if (message === 'REQUEST_TIMEOUT' || message === 'REQUEST_FAILED') return 'لم يصل رد من الخدمة. تحقق من نشر Apps Script على أنه متاح لأي شخص، ثم حاول مجددًا.';
-    if (message === 'SUBMISSION_PENDING') return 'لم يصلنا تأكيد نهائي من Apps Script. لا تعِد الإرسال الآن؛ افحص سجل التنفيذ وورقة Google Sheets أولًا لتجنب التكرار.';
-    if (message === 'API_VERSION_OLD') return 'الخدمة المنشورة تستخدم إصدارًا قديمًا. حدّث Code.gs ثم اختر Deploy ← Manage deployments ← Edit ← New version ← Deploy. لم نعرض رسالة نجاح لأن الإصدار القديم لا يؤكد مكان الحفظ.';
-    if (message === 'WRITE_NOT_VERIFIED') return 'لم يتمكن الخادم من التحقق من وجود الصف بعد الكتابة. افحص Apps Script → Executions قبل إعادة الإرسال.';
+    if (message === 'CONFIG_MISSING') return 'أعد تحميل الصفحة.';
+    if (message === 'REQUEST_TIMEOUT' || message === 'REQUEST_FAILED') return 'أعد تحميل الصفحة.';
+    if (message === 'SUBMISSION_PENDING') return 'أعد تحميل الصفحة.';
+    if (message === 'API_VERSION_OLD') return 'أعد تحميل الصفحة.';
+    if (message === 'WRITE_NOT_VERIFIED') return 'أعد تحميل الصفحة.';
     if (message.indexOf('RATE_LIMIT') >= 0 || message.indexOf('حد الإرسال') >= 0) return 'تم الوصول إلى حد الإرسال المؤقت. حاول مرة أخرى بعد قليل.';
     if (message.indexOf('تعذر') === 0 || message.indexOf('يرجى') === 0 || message.indexOf('اكتب') === 0 || message.indexOf('المشكلة') === 0 || message.indexOf('تم الوصول') === 0) return message;
-    return 'حدث خطأ في الاتصال أو في معالجة الطلب. تحقق من الإعدادات وحاول مرة أخرى.';
+    return 'أعد تحميل الصفحة.';
   }
   function showToast(message, type) {
     const node = $('#toast');
